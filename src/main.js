@@ -149,6 +149,28 @@ class Info {
     }
 }
 
+function checkCommandIsValid(info, client, message) {
+    if (!process.env.discordHelperIds.split(' ').includes(message.author.id)) {
+        message.reply('You do not have the permissions to use me.');
+        return false;
+    }
+    if (process.env.discordHelperIds.split(' ').includes(info.user.id)) {
+        message.reply(
+            `You can not ${info.punishmentType} another member of staff.`
+        );
+        return false;
+    }
+    if (info.user.id == client.user.id) {
+        message.reply(`You can not ${info.punishmentType} me.`);
+        return false;
+    }
+    if (info.reason == undefined) {
+        message.reply('You need to add a reason');
+        return false;
+    }
+    return true;
+}
+
 // Login to discord application
 client.once('ready', () => {
     console.log(`${client.user.username} has successfully logged in!`);
@@ -161,29 +183,10 @@ client.on('messageCreate', message => {
     // remove prefix and split command into an array
     message.content = message.content.slice(1).split(' ');
 
-    // Check if user has permissions to use bot
-    if (!process.env.discordHelperIds.split(' ').includes(message.author.id)) {
-        message.reply('You do not have the permissions to use me.');
-        return;
-    }
-
     if (message.content[0] === 'ban') {
         let info = new Info(message);
 
-        if (process.env.discordHelperIds.split(' ').includes(info.user.id)) {
-            message.reply(
-                `You can not ${info.punishmentType} another member of staff.`
-            );
-            return;
-        }
-        if (info.user.id == client.user.id) {
-            message.reply(`You can not ${info.punishmentType} me.`);
-            return;
-        }
-        if (info.reason == undefined) {
-            message.reply('You need to add a reason');
-            return;
-        }
+        if (checkCommandIsValid(info, client, message) == false) return;
 
         message.reply(`Banned ${info.user.username} for ${info.reason}.`);
 
@@ -192,20 +195,8 @@ client.on('messageCreate', message => {
     } else if (message.content[0] === 'kick') {
         let info = new Info(message);
 
-        if (process.env.discordHelperIds.split(' ').includes(info.user.id)) {
-            message.reply(
-                `You can not ${info.punishmentType} another member of staff.`
-            );
-            return;
-        }
-        if (info.user.id == client.user.id) {
-            message.reply(`You can not ${info.punishmentType} me.`);
-            return;
-        }
-        if (info.reason == undefined) {
-            message.reply('You need to add a reason');
-            return;
-        }
+        if (checkCommandIsValid(info, client, message) == false) return;
+
         message.reply(`Kicked ${info.user.username} for ${info.reason}.`);
 
         sendEmailAlert(info);
@@ -213,20 +204,7 @@ client.on('messageCreate', message => {
     } else if (message.content[0] === 'unban') {
         let info = new Info(message);
 
-        if (process.env.discordHelperIds.split(' ').includes(info.user.id)) {
-            message.reply(
-                `You can not ${info.punishmentType} another member of staff.`
-            );
-            return;
-        }
-        if (info.user.id == client.user.id) {
-            message.reply(`You can not ${info.punishmentType} me.`);
-            return;
-        }
-        if (info.reason == undefined) {
-            message.reply('You need to add a reason');
-            return;
-        }
+        if (checkCommandIsValid(info, client, message) == false) return;
 
         message.reply(`Unbanned ${info.user.username} for ${info.reason}.`);
 
