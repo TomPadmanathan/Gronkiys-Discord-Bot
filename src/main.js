@@ -190,6 +190,17 @@ client.on('messageCreate', message => {
 
         message.reply(`Banned ${info.user.username} for ${info.reason}.`);
 
+        client.users.send(
+            info.user.id,
+            `You have been ${
+                info.punishmentType + 'ed'
+            } from Gronkiy\'s Discord Server for \'${
+                info.reason
+            }\'. If you think this ${
+                info.punishmentType
+            } was unfair or a mistake, please dm BabyMole#5476 and we will review your punishment.`
+        );
+
         sendEmailAlert(info);
         commitPunishmentToDatabase(info);
     } else if (message.content[0] === 'kick') {
@@ -199,6 +210,17 @@ client.on('messageCreate', message => {
 
         message.reply(`Kicked ${info.user.username} for ${info.reason}.`);
 
+        client.users.send(
+            info.user.id,
+            `You have been ${
+                info.punishmentType + 'ed'
+            } from Gronkiy\'s Discord Server for \'${
+                info.reason
+            }\'. If you think this ${
+                info.punishmentType
+            } was unfair or a mistake, please dm BabyMole#5476 and we will review your punishment.`
+        );
+
         sendEmailAlert(info);
         commitPunishmentToDatabase(info);
     } else if (message.content[0] === 'unban') {
@@ -207,6 +229,15 @@ client.on('messageCreate', message => {
         if (checkCommandIsValid(info, client, message) == false) return;
 
         message.reply(`Unbanned ${info.user.username} for ${info.reason}.`);
+
+        client.users.send(
+            info.user.id,
+            `You have been ${
+                info.punishmentType + 'ed'
+            } from Gronkiy\'s Discord Server for \'${
+                info.reason
+            }\'. Feel free to join back with this link https://discord.gg/nwZM5gMk3s`
+        );
 
         sendEmailAlert(info);
         commitPunishmentToDatabase(info);
