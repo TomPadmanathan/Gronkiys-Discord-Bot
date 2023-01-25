@@ -4,7 +4,7 @@ require('dotenv').config({
     path: path.resolve(__dirname, '.env'),
 });
 
-// Nodemailer
+// nodemailer
 const nodemailer = require('nodemailer');
 
 const transporter = nodemailer.createTransport({
@@ -15,240 +15,10 @@ const transporter = nodemailer.createTransport({
     },
 });
 
-// Mysql
-const mysql = require('mysql2');
-
-const connection = mysql.createConnection({
-    host: process.env.mysqlHost,
-    user: process.env.mysqlUser,
-    password: process.env.mysqlPass,
-    database: process.env.mysqlDatabase,
-});
-
-// Discord
-const {
-    Client,
-    Events,
-    GatewayIntentBits,
-    InteractionCollector,
-    Guild,
-    GuildBan,
-} = require('discord.js');
-const client = new Client({
-    intents: [
-        GatewayIntentBits.Guilds,
-        GatewayIntentBits.GuildMessages,
-        GatewayIntentBits.MessageContent,
-    ],
-});
-const prefix = '!';
-
-client.once('ready', () => {
-    console.log(`${client.user.username} has successfully logged in!`);
-});
-
-client.on('messageCreate', message => {
-    if (message.content.split('')[0] != prefix || message.author.bot) return;
-
-    message.content = message.content.slice(1).split(' ');
-
-    if (!process.env.discordHelperIds.split(' ').includes(message.author.id)) {
-        message.reply('You do not have the permissions to use me');
-        return;
-    }
-
-    if (info.user.id == client.user.id) {
-        message.reply('You can not punish me');
-        return;
-    }
-
-    if (message.content[0] === 'ban') {
-        // Ban user
-
-        let info = {
-            punishmentType: 'ban',
-            helper: {
-                id: message.author.id,
-                username:
-                    message.author.username +
-                    '#' +
-                    message.author.discriminator,
-            },
-            user: {
-                id: message.content[1],
-                username: '',
-            },
-            reason: '',
-            attachment: '',
-            datetime: new Date(message.createdTimestamp)
-                .toJSON()
-                .slice(0, 19)
-                .replace('T', ' '),
-        };
-
-        info.reason = message.content[2];
-        for (let i = 3; i < message.content.length; i++) {
-            info.reason = info.reason + ' ' + message.content[i];
-        }
-
-        info.user.id = info.user.id.split('');
-        for (let i = 0; i < info.user.id.length; i++) {
-            if (
-                info.user.id[i] == '<' ||
-                info.user.id[i] == '>' ||
-                info.user.id[i] == '@' ||
-                info.user.id[i] == '!'
-            ) {
-                delete info.user.id[i];
-            }
-        }
-        info.user.id = info.user.id.join('');
-
-        info.user.username =
-            client.users.cache.get(info.user.id).username +
-            '#' +
-            client.users.cache.get(info.user.id).discriminator;
-
-        info.attachment = message.attachments.first().url;
-
-        if (process.env.discordHelperIds.split(' ').includes(info.user.id)) {
-            message.reply('You can not ban another member of staff');
-            return;
-        }
-
-        message.reply(`Banned ${info.user.username} for ${info.reason}`);
-
-        sendEmailAlert(info);
-        commitPunishmentToDatabase(info);
-    } else if (message.content[0] === 'kick') {
-        // Kick user
-
-        let info = {
-            punishmentType: 'kick',
-            helper: {
-                id: message.author.id,
-                username:
-                    message.author.username +
-                    '#' +
-                    message.author.discriminator,
-            },
-            user: {
-                id: message.content[1],
-                username: '',
-            },
-            reason: '',
-            attachment: '',
-            datetime: new Date(message.createdTimestamp)
-                .toJSON()
-                .slice(0, 19)
-                .replace('T', ' '),
-        };
-
-        info.reason = message.content[2];
-        for (let i = 3; i < message.content.length; i++) {
-            info.reason = info.reason + ' ' + message.content[i];
-        }
-
-        info.user.id = info.user.id.split('');
-        for (let i = 0; i < info.user.id.length; i++) {
-            if (
-                info.user.id[i] == '<' ||
-                info.user.id[i] == '>' ||
-                info.user.id[i] == '@' ||
-                info.user.id[i] == '!'
-            ) {
-                delete info.user.id[i];
-            }
-        }
-        info.user.id = info.user.id.join('');
-
-        info.user.username =
-            client.users.cache.get(info.user.id).username +
-            '#' +
-            client.users.cache.get(info.user.id).discriminator;
-
-        info.attachment = message.attachments.first().url;
-
-        if (process.env.discordHelperIds.split(' ').includes(info.user.id)) {
-            message.reply('You can not kick another member of staff');
-            return;
-        }
-
-        message.reply(`Kicked ${info.user.username} for ${info.reason}`);
-
-        sendEmailAlert(info);
-        commitPunishmentToDatabase(info);
-    } else if (message.content[0] === 'unban') {
-        // Unban user
-
-        let info = {
-            punishmentType: 'unban',
-            duration: 0,
-            helper: {
-                id: message.author.id,
-                username:
-                    message.author.username +
-                    '#' +
-                    message.author.discriminator,
-            },
-            user: {
-                id: message.content[1],
-                username: '',
-            },
-            reason: '',
-            attachment: '',
-            datetime: new Date(message.createdTimestamp)
-                .toJSON()
-                .slice(0, 19)
-                .replace('T', ' '),
-        };
-
-        info.reason = message.content[2];
-        for (let i = 3; i < message.content.length; i++) {
-            info.reason = info.reason + ' ' + message.content[i];
-        }
-
-        info.user.id = info.user.id.split('');
-        for (let i = 0; i < info.user.id.length; i++) {
-            if (
-                info.user.id[i] == '<' ||
-                info.user.id[i] == '>' ||
-                info.user.id[i] == '@' ||
-                info.user.id[i] == '!'
-            ) {
-                delete info.user.id[i];
-            }
-        }
-        info.user.id = info.user.id.join('');
-
-        info.user.username =
-            client.users.cache.get(info.user.id).username +
-            '#' +
-            client.users.cache.get(info.user.id).discriminator;
-
-        info.attachment = message.attachments.first().url;
-
-        if (process.env.discordHelperIds.split(' ').includes(info.user.id)) {
-            message.reply('You can not unban another member of staff');
-            return;
-        }
-
-        message.reply(`Unbanned ${info.user.username} for ${info.reason}`);
-
-        sendEmailAlert(info);
-        commitPunishmentToDatabase(info);
-    } else {
-        message.reply('Command not found');
-    }
-});
-
-client.login(process.env.discordAuthToken);
-
 function sendEmailAlert(info) {
-    // Email data
     mailOptions = {
         from: process.env.nodemailerEmail,
-        to: 'padmanathantom@gmail.com',
+        to: process.env.nodemailerEmailRecipient,
         subject: `${info.helper.username} has ${info.punishmentType + 'ed'} ${
             info.user.username
         }`,
@@ -282,6 +52,16 @@ function sendEmailAlert(info) {
     });
 }
 
+// mysql
+const mysql = require('mysql2');
+
+const connection = mysql.createConnection({
+    host: process.env.mysqlHost,
+    user: process.env.mysqlUser,
+    password: process.env.mysqlPass,
+    database: process.env.mysqlDatabase,
+});
+
 function commitPunishmentToDatabase(info) {
     connection.connect(err => {
         if (err) throw err;
@@ -296,3 +76,142 @@ function commitPunishmentToDatabase(info) {
         );
     });
 }
+
+// discord js
+const {
+    Client,
+    Events,
+    GatewayIntentBits,
+    InteractionCollector,
+    Guild,
+    GuildBan,
+} = require('discord.js');
+const client = new Client({
+    intents: [
+        GatewayIntentBits.Guilds,
+        GatewayIntentBits.GuildMessages,
+        GatewayIntentBits.MessageContent,
+    ],
+});
+const prefix = '!';
+
+class Info {
+    userid(message) {
+        let userid = message.content[1].split('');
+        for (let i = 0; i < userid.length; i++) {
+            if (
+                userid[i] == '<' ||
+                userid[i] == '>' ||
+                userid[i] == '@' ||
+                userid[i] == '!'
+            ) {
+                delete userid[i];
+            }
+        }
+        return userid.join('');
+    }
+    reason(message) {
+        let reason = message.content[2];
+        for (let i = 3; i < message.content.length; i++) {
+            reason = reason + ' ' + message.content[i];
+        }
+        return reason;
+    }
+
+    constructor(message) {
+        this.punishmentType = message.content[0];
+        this.helper = {
+            id: message.author.id,
+            username:
+                message.author.username + '#' + message.author.discriminator,
+        };
+        this.user = {
+            id: this.userid(message),
+            username:
+                client.users.cache.get(this.userid(message)).username +
+                '#' +
+                client.users.cache.get(this.userid(message)).discriminator,
+        };
+        this.reason = this.reason(message);
+        this.attachment = message.attachments.first().url;
+        this.datetime = new Date(message.createdTimestamp)
+            .toJSON()
+            .slice(0, 19)
+            .replace('T', ' ');
+    }
+}
+
+client.once('ready', () => {
+    console.log(`${client.user.username} has successfully logged in!`);
+});
+
+client.on('messageCreate', message => {
+    if (message.content.split('')[0] != prefix || message.author.bot) return;
+
+    message.content = message.content.slice(1).split(' ');
+
+    if (!process.env.discordHelperIds.split(' ').includes(message.author.id)) {
+        message.reply('You do not have the permissions to use me.');
+        return;
+    }
+
+    if (message.content[0] === 'ban') {
+        let info = new Info(message);
+
+        if (process.env.discordHelperIds.split(' ').includes(info.user.id)) {
+            message.reply(
+                `You can not ${info.punishmentType} another member of staff.`
+            );
+            return;
+        }
+        if (info.user.id == client.user.id) {
+            message.reply(`You can not ${info.punishmentType} me`);
+            return;
+        }
+
+        message.reply(`Banned ${info.user.username} for ${info.reason}.`);
+
+        sendEmailAlert(info);
+        commitPunishmentToDatabase(info);
+    } else if (message.content[0] === 'kick') {
+        let info = new Info(message);
+
+        if (process.env.discordHelperIds.split(' ').includes(info.user.id)) {
+            message.reply(
+                `You can not ${info.punishmentType} another member of staff.`
+            );
+            return;
+        }
+        if (info.user.id == client.user.id) {
+            message.reply(`You can not ${info.punishmentType} me.`);
+            return;
+        }
+
+        message.reply(`Kicked ${info.user.username} for ${info.reason}.`);
+
+        sendEmailAlert(info);
+        commitPunishmentToDatabase(info);
+    } else if (message.content[0] === 'unban') {
+        let info = new Info(message);
+
+        if (process.env.discordHelperIds.split(' ').includes(info.user.id)) {
+            message.reply(
+                `You can not ${info.punishmentType} another member of staff.`
+            );
+            return;
+        }
+        if (info.user.id == client.user.id) {
+            message.reply(`You can not ${info.punishmentType} me.`);
+            return;
+        }
+
+        message.reply(`Unbanned ${info.user.username} for ${info.reason}.`);
+
+        sendEmailAlert(info);
+        commitPunishmentToDatabase(info);
+    } else {
+        message.reply('Command not found.');
+    }
+});
+
+client.login(process.env.discordAuthToken);
