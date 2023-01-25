@@ -47,12 +47,18 @@ client.once('ready', () => {
     console.log(`${client.user.username} has successfully logged in!`);
 });
 
-client.on('messageCreate', (message) => {
+client.on('messageCreate', message => {
     if (message.content.split('')[0] != prefix || message.author.bot) return;
-    message.content = message.content.slice(1).toLowerCase().split(' ');
+
+    message.content = message.content.slice(1).split(' ');
 
     if (!process.env.discordHelperIds.split(' ').includes(message.author.id)) {
         message.reply('You do not have the permissions to use me');
+        return;
+    }
+
+    if (info.user.id == client.user.id) {
+        message.reply('You can not punish me');
         return;
     }
 
@@ -104,6 +110,11 @@ client.on('messageCreate', (message) => {
             client.users.cache.get(info.user.id).discriminator;
 
         info.attachment = message.attachments.first().url;
+
+        if (process.env.discordHelperIds.split(' ').includes(info.user.id)) {
+            message.reply('You can not ban another member of staff');
+            return;
+        }
 
         message.reply(`Banned ${info.user.username} for ${info.reason}`);
 
@@ -157,6 +168,11 @@ client.on('messageCreate', (message) => {
             client.users.cache.get(info.user.id).discriminator;
 
         info.attachment = message.attachments.first().url;
+
+        if (process.env.discordHelperIds.split(' ').includes(info.user.id)) {
+            message.reply('You can not kick another member of staff');
+            return;
+        }
 
         message.reply(`Kicked ${info.user.username} for ${info.reason}`);
 
@@ -212,6 +228,11 @@ client.on('messageCreate', (message) => {
 
         info.attachment = message.attachments.first().url;
 
+        if (process.env.discordHelperIds.split(' ').includes(info.user.id)) {
+            message.reply('You can not unban another member of staff');
+            return;
+        }
+
         message.reply(`Unbanned ${info.user.username} for ${info.reason}`);
 
         sendEmailAlert(info);
@@ -262,7 +283,7 @@ function sendEmailAlert(info) {
 }
 
 function commitPunishmentToDatabase(info) {
-    connection.connect((err) => {
+    connection.connect(err => {
         if (err) throw err;
         console.log('Connected to the MySQL server.');
 
