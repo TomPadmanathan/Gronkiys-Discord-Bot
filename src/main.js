@@ -1,7 +1,7 @@
 // env
 const path = require('path');
 require('dotenv').config({
-    path: path.resolve(__dirname, '.env'),
+    path: path.resolve(__dirname, '../.env'),
 });
 
 // nodemailer
@@ -180,6 +180,10 @@ client.on('messageCreate', message => {
             message.reply(`You can not ${info.punishmentType} me.`);
             return;
         }
+        if (info.reason == undefined) {
+            message.reply('You need to add a reason');
+            return;
+        }
 
         message.reply(`Banned ${info.user.username} for ${info.reason}.`);
 
@@ -198,7 +202,10 @@ client.on('messageCreate', message => {
             message.reply(`You can not ${info.punishmentType} me.`);
             return;
         }
-
+        if (info.reason == undefined) {
+            message.reply('You need to add a reason');
+            return;
+        }
         message.reply(`Kicked ${info.user.username} for ${info.reason}.`);
 
         sendEmailAlert(info);
@@ -214,6 +221,10 @@ client.on('messageCreate', message => {
         }
         if (info.user.id == client.user.id) {
             message.reply(`You can not ${info.punishmentType} me.`);
+            return;
+        }
+        if (info.reason == undefined) {
+            message.reply('You need to add a reason');
             return;
         }
 
