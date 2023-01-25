@@ -118,6 +118,13 @@ class Info {
         }
         return reason;
     }
+    attachment(message) {
+        try {
+            return message.attachments.first().url;
+        } catch {
+            return undefined;
+        }
+    }
 
     constructor(message) {
         this.punishmentType = message.content[0];
@@ -134,7 +141,7 @@ class Info {
                 client.users.cache.get(this.userid(message)).discriminator,
         };
         this.reason = this.reason(message);
-        this.attachment = message.attachments.first().url;
+        this.attachment = this.attachment(message);
         this.datetime = new Date(message.createdTimestamp)
             .toJSON()
             .slice(0, 19)
