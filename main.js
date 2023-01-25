@@ -93,6 +93,7 @@ const client = new Client({
         GatewayIntentBits.MessageContent,
     ],
 });
+
 const prefix = '!';
 
 class Info {
@@ -141,15 +142,19 @@ class Info {
     }
 }
 
+// Login to discord application
 client.once('ready', () => {
     console.log(`${client.user.username} has successfully logged in!`);
 });
 
+// Listen for messages
 client.on('messageCreate', message => {
     if (message.content.split('')[0] != prefix || message.author.bot) return;
 
+    // remove prefix and split command into an array
     message.content = message.content.slice(1).split(' ');
 
+    // Check if user has permissions to use bot
     if (!process.env.discordHelperIds.split(' ').includes(message.author.id)) {
         message.reply('You do not have the permissions to use me.');
         return;
@@ -165,7 +170,7 @@ client.on('messageCreate', message => {
             return;
         }
         if (info.user.id == client.user.id) {
-            message.reply(`You can not ${info.punishmentType} me`);
+            message.reply(`You can not ${info.punishmentType} me.`);
             return;
         }
 
