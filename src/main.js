@@ -184,60 +184,58 @@ client.on('messageCreate', message => {
     message.content = message.content.slice(1).split(' ');
 
     if (message.content[0] === 'ban') {
-        let info = new Info(message);
+        let info;
+        try {
+            info = new Info(message);
+        } catch {
+            message.reply('An error has occured obtaining user info');
+            return;
+        }
 
         if (checkCommandIsValid(info, client, message) == false) return;
 
-        message.reply(`Banned ${info.user.username} for ${info.reason}.`);
-
-        client.users.send(
-            info.user.id,
-            `You have been ${
-                info.punishmentType + 'ed'
-            } from Gronkiy\'s Discord Server for \'${
-                info.reason
-            }\'. If you think this ${
-                info.punishmentType
-            } was unfair or a mistake, please dm BabyMole#5476 and we will review your punishment.`
-        );
+        try {
+            const member = message.mentions.members.first();
+            member.ban({ reason: info.reason });
+            message.reply(
+                `${info.punishmentType + 'ed'} ${info.user.username} for ${
+                    info.reason
+                }.`
+            );
+        } catch {
+            message.reply(
+                `An error has occured ${info.punishmentType + 'ing'} the user`
+            );
+            return;
+        }
 
         sendEmailAlert(info);
         commitPunishmentToDatabase(info);
     } else if (message.content[0] === 'kick') {
-        let info = new Info(message);
+        let info;
+        try {
+            info = new Info(message);
+        } catch {
+            message.reply('An error has occured obtaining user info');
+            return;
+        }
 
         if (checkCommandIsValid(info, client, message) == false) return;
 
-        message.reply(`Kicked ${info.user.username} for ${info.reason}.`);
-
-        client.users.send(
-            info.user.id,
-            `You have been ${
-                info.punishmentType + 'ed'
-            } from Gronkiy\'s Discord Server for \'${
-                info.reason
-            }\'. If you think this ${
-                info.punishmentType
-            } was unfair or a mistake, please dm BabyMole#5476 and we will review your punishment.`
-        );
-
-        sendEmailAlert(info);
-        commitPunishmentToDatabase(info);
-    } else if (message.content[0] === 'unban') {
-        let info = new Info(message);
-
-        if (checkCommandIsValid(info, client, message) == false) return;
-
-        message.reply(`Unbanned ${info.user.username} for ${info.reason}.`);
-
-        client.users.send(
-            info.user.id,
-            `You have been ${
-                info.punishmentType + 'ed'
-            } from Gronkiy\'s Discord Server for \'${
-                info.reason
-            }\'. Feel free to join back with this link https://discord.gg/nwZM5gMk3s`
-        );
+        try {
+            const member = message.mentions.members.first();
+            member.kick({ reason: info.reason });
+            message.reply(
+                `${info.punishmentType + 'ed'} ${info.user.username} for ${
+                    info.reason
+                }.`
+            );
+        } catch {
+            message.reply(
+                `An error has occured ${info.punishmentType + 'ing'} the user`
+            );
+            return;
+        }
 
         sendEmailAlert(info);
         commitPunishmentToDatabase(info);
