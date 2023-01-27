@@ -85,6 +85,7 @@ const {
     InteractionCollector,
     Guild,
     GuildBan,
+    ActivityType,
 } = require('discord.js');
 const client = new Client({
     intents: [
@@ -96,7 +97,9 @@ const client = new Client({
 
 const prefix = '!';
 
-class Info {
+class CommandFormat1 {
+    // In server
+    // type @user reason
     userid(message) {
         let userid = message.content[1].split('');
         for (let i = 0; i < userid.length; i++) {
@@ -149,6 +152,44 @@ class Info {
     }
 }
 
+class CommandFormat2 {
+    // Not in server
+    // type id username reason
+    reason(message) {
+        let reason = message.content[3];
+        for (let i = 4; i < message.content.length; i++) {
+            reason = reason + ' ' + message.content[i];
+        }
+        return reason;
+    }
+    attachment(message) {
+        try {
+            return message.attachments.first().url;
+        } catch {
+            return undefined;
+        }
+    }
+
+    constructor(message) {
+        this.punishmentType = message.content[0];
+        this.helper = {
+            id: message.author.id,
+            username:
+                message.author.username + '#' + message.author.discriminator,
+        };
+        this.user = {
+            id: message.content[1],
+            username: message.content[2],
+        };
+        this.reason = this.reason(message);
+        this.attachment = this.attachment(message);
+        this.datetime = new Date(message.createdTimestamp)
+            .toJSON()
+            .slice(0, 19)
+            .replace('T', ' ');
+    }
+}
+
 function checkCommandIsValid(info, client, message) {
     if (!process.env.discordHelperIds.split(' ').includes(message.author.id)) {
         message.reply('You do not have the permissions to use me.');
@@ -164,7 +205,7 @@ function checkCommandIsValid(info, client, message) {
         message.reply(`You can not ${info.punishmentType} me.`);
         return false;
     }
-    if (info.reason == undefined) {
+    if (!info.reason) {
         message.reply('You need to add a reason');
         return false;
     }
@@ -177,7 +218,7 @@ client.once('ready', () => {
 });
 
 // Listen for messages
-client.on('messageCreate', message => {
+client.on('messageCreate', async message => {
     if (message.content.split('')[0] != prefix || message.author.bot) return;
 
     // remove prefix and split command into an array
@@ -186,13 +227,13 @@ client.on('messageCreate', message => {
     if (message.content[0] === 'ban') {
         let info;
         try {
-            info = new Info(message);
+            info = new CommandFormat1(message);
         } catch {
             message.reply('An error has occured obtaining user info');
             return;
         }
 
-        if (checkCommandIsValid(info, client, message) == false) return;
+        if (!checkCommandIsValid(info, client, message)) return;
 
         try {
             const member = message.mentions.members.first();
@@ -214,13 +255,13 @@ client.on('messageCreate', message => {
     } else if (message.content[0] === 'kick') {
         let info;
         try {
-            info = new Info(message);
+            info = new CommandFormat1(message);
         } catch {
             message.reply('An error has occured obtaining user info');
             return;
         }
 
-        if (checkCommandIsValid(info, client, message) == false) return;
+        if (!checkCommandIsValid(info, client, message)) return;
 
         try {
             const member = message.mentions.members.first();
@@ -239,6 +280,41 @@ client.on('messageCreate', message => {
 
         sendEmailAlert(info);
         commitPunishmentToDatabase(info);
+    } else if (message.content[0] === 'unban') {
+        let info;
+        try {
+            info = new CommandFormat2(message);
+        } catch {
+            message.reply('An error has occured obtaining user info');
+            return;
+        }
+
+        if (!checkCommandIsValid(info, client, message)) return;
+
+        try {
+            await message.guild.members.unban(info.user.id);
+            message.reply(
+                `${info.punishmentType + 'ed'} ${info.user.username} for ${
+                    info.reason
+                }.`
+            );
+        } catch {
+            message.reply(
+                `An error has occured ${info.punishmentType + 'ing'} the user`
+            );
+            return;
+        }
+
+        sendEmailAlert(info);
+        commitPunishmentToDatabase(info);
+    } else if (message.content[0] === 'help') {
+        message.reply(
+            `
+            > **Ban**:\n > \`${prefix}ban 'usermention' 'reason'\` \n > \`${prefix}ban @BabyMole Spamming in general\` \n
+            > **Kick**:\n > \`${prefix}kick 'usermention' 'reason'\` \n > \`${prefix}kick @BabyMole Spamming in general\` \n
+            > **Unban**:\n > \`${prefix}unban 'userid' 'username' 'reason'\` \n > \`${prefix}unban 556184736251248659 BabyMole#5476 Mistakenly banned\`
+            `
+        );
     } else {
         message.reply('Command not found.');
     }
