@@ -45,7 +45,6 @@ function sendEmailAlert(info) {
             </tr>
         </table>`,
     };
-
     transporter.sendMail(mailOptions, (err, info) => {
         if (err) throw err;
         else console.log('Notification email sent: ' + info.response);
