@@ -215,6 +215,13 @@ function checkCommandIsValid(info, client, message) {
 // Login to discord application
 client.once('ready', () => {
     console.log(`${client.user.username} has successfully logged in!`);
+
+    client.user.setPresence({
+        activities: [
+            { name: `${prefix}help for help`, type: ActivityType.Listening },
+        ],
+        status: 'online',
+    });
 });
 
 // Listen for messages
