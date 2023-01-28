@@ -307,8 +307,13 @@ client.once('ready', () => {
 client.on('messageCreate', async message => {
     if (message.content.split('')[0] != prefix || message.author.bot) return;
 
-    // remove prefix and split command into an array
-    message.content = message.content.slice(1).split(' ');
+    // remove prefix and split command into an array and remove empty string in array
+    message.content = message.content
+        .slice(1)
+        .split(' ')
+        .filter(elm => {
+            return elm !== '';
+        });
 
     if (message.content[0] === 'ban') {
         let info;
@@ -322,8 +327,7 @@ client.on('messageCreate', async message => {
         if (!checkCommandIsValid(info, client, message)) return;
 
         try {
-            const member = message.mentions.members.first();
-            member.ban({ reason: info.reason });
+            message.mentions.members.first().ban({ reason: info.reason });
             message.reply(
                 `${info.punishmentType + 'ed'} ${info.user.username} for ${
                     info.reason
@@ -350,8 +354,7 @@ client.on('messageCreate', async message => {
         if (!checkCommandIsValid(info, client, message)) return;
 
         try {
-            const member = message.mentions.members.first();
-            member.kick({ reason: info.reason });
+            message.mentions.members.first().kick({ reason: info.reason });
             message.reply(
                 `${info.punishmentType + 'ed'} ${info.user.username} for ${
                     info.reason
@@ -405,8 +408,9 @@ client.on('messageCreate', async message => {
         if (!checkCommandIsValid(info, client, message)) return;
 
         try {
-            const member = message.mentions.members.first();
-            member.timeout(info.duration, info.reason);
+            message.mentions.members
+                .first()
+                .timeout(info.duration, info.reason);
             message.reply(
                 `Timed out ${info.user.username} for ${info.reason}.`
             );
@@ -431,8 +435,7 @@ client.on('messageCreate', async message => {
         if (!checkCommandIsValid(info, client, message)) return;
 
         try {
-            const member = message.mentions.members.first();
-            member.timeout(1, info.reason);
+            message.mentions.members.first().timeout(1, info.reason);
             message.reply(
                 `Removed timeout on ${info.user.username} for ${info.reason}.`
             );
