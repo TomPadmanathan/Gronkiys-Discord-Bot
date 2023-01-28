@@ -15,13 +15,21 @@ const transporter = nodemailer.createTransport({
     },
 });
 
+const punishmentPast = {
+    ban: 'banned',
+    unban: 'unbanned',
+    kick: 'kicked',
+    timeout: 'timedout',
+    untimeout: 'untimedout',
+};
+
 function sendEmailAlert(info) {
     mailOptions = {
         from: process.env.nodemailerEmail,
         to: process.env.nodemailerEmailRecipient,
-        subject: `${info.helper.username} has ${info.punishmentType + 'ed'} ${
-            info.user.username
-        }`,
+        subject: `${info.helper.username} has ${
+            punishmentPast[info.punishmentType]
+        } ${info.user.username}`,
         html: `<table style="border: 1px solid black; border-collapse: collapse; padding: 10px;">
             <tr style="border: 1px solid black; border-collapse: collapse; padding: 10px;">
                 <td style="border: 1px solid black; border-collapse: collapse; padding: 10px;">Punishment Type</td>
@@ -96,7 +104,7 @@ const client = new Client({
     ],
 });
 
-const prefix = '!';
+const prefix = '$';
 
 class CommandFormat1 {
     // In server
@@ -329,9 +337,9 @@ client.on('messageCreate', async message => {
         try {
             message.mentions.members.first().ban({ reason: info.reason });
             message.reply(
-                `${info.punishmentType + 'ed'} ${info.user.username} for ${
-                    info.reason
-                }.`
+                `${punishmentPast[info.punishmentType]} ${
+                    info.user.username
+                } for ${info.reason}.`
             );
         } catch {
             message.reply(
@@ -356,9 +364,9 @@ client.on('messageCreate', async message => {
         try {
             message.mentions.members.first().kick({ reason: info.reason });
             message.reply(
-                `${info.punishmentType + 'ed'} ${info.user.username} for ${
-                    info.reason
-                }.`
+                `${punishmentPast[info.punishmentType]} ${
+                    info.user.username
+                } for ${info.reason}.`
             );
         } catch {
             message.reply(
@@ -383,9 +391,9 @@ client.on('messageCreate', async message => {
         try {
             await message.guild.members.unban(info.user.id);
             message.reply(
-                `${info.punishmentType + 'ed'} ${info.user.username} for ${
-                    info.reason
-                }.`
+                `${punishmentPast[info.punishmentType]} ${
+                    info.user.username
+                } for ${info.reason}.`
             );
         } catch {
             message.reply(
@@ -412,7 +420,9 @@ client.on('messageCreate', async message => {
                 .first()
                 .timeout(info.duration, info.reason);
             message.reply(
-                `Timed out ${info.user.username} for ${info.reason}.`
+                `${punishmentPast[info.punishmentType]} ${
+                    info.user.username
+                } for ${info.reason}.`
             );
         } catch {
             message.reply(
@@ -437,11 +447,11 @@ client.on('messageCreate', async message => {
         try {
             message.mentions.members.first().timeout(1, info.reason);
             message.reply(
-                `Removed timeout on ${info.user.username} for ${info.reason}.`
+                `Removed ${info.punishmentType} on ${info.user.username} for ${info.reason}.`
             );
         } catch {
             message.reply(
-                `An error has occured removing the timeout on the user`
+                `An error has occured removing the ${info.punishmentType} on the user`
             );
             return;
         }
