@@ -419,13 +419,40 @@ client.on('messageCreate', async message => {
 
         sendEmailAlert(info);
         commitPunishmentToDatabase(info);
+    } else if (message.content[0] === 'untimeout') {
+        let info;
+        try {
+            info = new CommandFormat1(message);
+        } catch {
+            message.reply('An error has occured obtaining user info');
+            return;
+        }
+
+        if (!checkCommandIsValid(info, client, message)) return;
+
+        try {
+            const member = message.mentions.members.first();
+            member.timeout(1, info.reason);
+            message.reply(
+                `Removed timeout on ${info.user.username} for ${info.reason}.`
+            );
+        } catch {
+            message.reply(
+                `An error has occured removing the timeout on the user`
+            );
+            return;
+        }
+
+        sendEmailAlert(info);
+        commitPunishmentToDatabase(info);
     } else if (message.content[0] === 'help') {
         message.reply(
             `
             > **Ban**:\n > \`${prefix}ban 'usermention' 'reason'\` \n > \`${prefix}ban @BabyMole Spamming in general\` \n
+            > **Unban**:\n > \`${prefix}unban 'userid' 'username' 'reason'\` \n > \`${prefix}unban 556184736251248659 BabyMole#5476 Mistakenly banned\` \n
             > **Kick**:\n > \`${prefix}kick 'usermention' 'reason'\` \n > \`${prefix}kick @BabyMole Spamming in general\` \n
             > **Timeout**:\n > \`${prefix}timeout 'usermention' 'duration' 'reason'\` \n > \`${prefix}timeout @BabyMole 6d Spamming in general\` \n
-            > **Unban**:\n > \`${prefix}unban 'userid' 'username' 'reason'\` \n > \`${prefix}unban 556184736251248659 BabyMole#5476 Mistakenly banned\`
+            > **UnTimeout**:\n > \`${prefix}untimeout 'usermention' 'reason'\` \n > \`${prefix}timeout @BabyMole Mistake\`
             `
         );
     } else {
