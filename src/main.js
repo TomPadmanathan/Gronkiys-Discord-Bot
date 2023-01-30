@@ -447,7 +447,7 @@ client.on('messageCreate', async message => {
         try {
             message.mentions.members.first().timeout(1, info.reason);
             message.reply(
-                `Removed ${info.punishmentType} on ${info.user.username} for ${info.reason}.`
+                `${info.punishmentType} ${info.user.username} for ${info.reason}.`
             );
         } catch {
             message.reply(
@@ -465,7 +465,7 @@ client.on('messageCreate', async message => {
             > **Unban**:\n > \`${prefix}unban 'userid' 'username' 'reason'\` \n > \`${prefix}unban 556184736251248659 BabyMole#5476 Mistakenly banned\` \n
             > **Kick**:\n > \`${prefix}kick 'usermention' 'reason'\` \n > \`${prefix}kick @BabyMole Spamming in general\` \n
             > **Timeout**:\n > \`${prefix}timeout 'usermention' 'duration' 'reason'\` \n > \`${prefix}timeout @BabyMole 6d Spamming in general\` \n
-            > **UnTimeout**:\n > \`${prefix}untimeout 'usermention' 'reason'\` \n > \`${prefix}timeout @BabyMole Mistake\`
+            > **UnTimeout**:\n > \`${prefix}untimeout 'usermention' 'reason'\` \n > \`${prefix}untimeout @BabyMole Mistake\`
             `
         );
     } else {
