@@ -3,7 +3,7 @@ session_start();
 
 if(isset($_POST['submit_pass']) && $_POST['pass']) {
         $pass=$_POST['pass'];
-        if($pass=="rMp97SE3KjLNKAG4") {
+        if($pass=="") {
                 $_SESSION['password']=$pass;
         }
         else {
@@ -15,10 +15,10 @@ if(isset($_POST['page_logout'])) {
         unset($_SESSION['password']);
 }
 
-$user = "root";
-$password = "mysqlpass";
-$database = "gronkiydiscordbot";
-$servername = "localhost";
+$user = "";
+$password = "";
+$database = "";
+$servername = "";
 
 $mysqli = new mysqli($servername, $user,
                 $password, $database);
@@ -41,7 +41,7 @@ $mysqli->close();
 <!-- <div id="wrapper"> -->
 
 <?php
-if($_SESSION['password']=="rMp97SE3KjLNKAG4") {
+if($_SESSION['password']=="") {
         ?>
         <h1>Gronkiy Discord Bot Punishment Data</h1>
         <form method="post" action="" id="logout_form">
